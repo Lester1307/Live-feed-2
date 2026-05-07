@@ -3,145 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Cricket Streaming</title>
-    <!-- Video.js CSS -->
-    <link href="https://vjs.zencdn.net/7.21.0/video-js.css" rel="stylesheet"/>
+    <title>Cinemax | Global Review Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #E50914;
+            --dark: #060606;
+            --surface: #121212;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #1a1a1a, #3a3a3a);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--dark);
             color: #ffffff;
-            text-align: center;
-            padding: 20px;
             margin: 0;
+            overflow-x: hidden;
         }
 
-        h1 {
-            color: #ffcc00;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        .glass-nav {
+            background: rgba(6, 6, 6, 0.98);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .video-container {
-            max-width: 800px;
-            margin: auto;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        .section-header {
+            position: relative;
+            margin-bottom: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1.4rem;
+            letter-spacing: -0.01em;
+            color: #fff;
+        }
+        .section-header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -12px;
+            width: 45px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
         }
 
-        .video-js {
-            width: 100%;
-            height: 450px; /* Adjust height as needed */
+        .trending-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1.5rem;
+            padding: 10px 0 25px 0;
+            scrollbar-width: none;
+        }
+        .trending-container::-webkit-scrollbar { display: none; }
+
+        .trending-card {
+            flex: 0 0 auto;
+            width: 180px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+        .trending-card:hover { transform: translateY(-10px); }
+
+        .movie-card {
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+        .movie-card:hover { transform: translateY(-12px); }
+
+        .page-view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
         }
 
-        .button {
-            display: inline-block;
-            background-color: #ffcc00;
-            color: #121212;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
+        .logo-box {
+            background: var(--primary);
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
         }
 
-        .button:hover {
-            background-color: #e6b800;
+        .decorated-review-area {
+            background: linear-gradient(160deg, #181818 0%, #0a0a0a 100%);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(229, 9, 20, 0.05);
+            border-radius: 3rem;
+            padding: 3rem;
+            position: relative;
+        }
+        .decorated-review-area::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
-        footer {
-            margin-top: 30px;
-            font-size: 0.9em;
-            color: #cccccc;
+        .backdrop-mask {
+            background: linear-gradient(to top, var(--dark) 0%, rgba(6, 6, 6, 0.2) 50%, rgba(6, 6, 6, 0.98) 100%);
         }
 
-        /* Loader Styles */
-        #loader {
-            display: none; /* Hidden by default */
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
+        .shimmer {
+            background: linear-gradient(90deg, #121212 25%, #1d1d1d 50%, #121212 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        .loader {
-            border: 8px solid #f3f3f3; /* Light grey */
-            border-top: 8px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .video-js {
-                height: 300px; /* Adjust height for smaller screens */
-            }
-
-            .button {
-                padding: 8px 16px;
-            }
-        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Live Cricket Streaming</h1>
-    <h2> Sri Lanka Vs Newzealand 1st ODI  </h2>
-    <div class="video-container">
-        <div id="loader">
-            <div class="loader"></div>
+    <!-- Header -->
+    <nav class="fixed top-0 w-full z-[100] glass-nav px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer flex-shrink-0" onclick="homeAndReset()">
+                <div class="logo-box">
+                    <i class="fas fa-play text-white text-sm"></i>
+                </div>
+                <h1 class="text-xl font-black tracking-tighter uppercase">CINE<span class="text-white">MAX</span></h1>
+            </div>
+            
+            <div class="flex-1 max-w-xl relative">
+                <input type="text" id="searchInput" placeholder="Search for new series..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-2.5 text-sm focus:outline-none focus:border-red-600 transition-all text-white placeholder:text-gray-500">
+                <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-500 text-sm"></i>
+            </div>
+
+            <div class="hidden md:flex items-center gap-6 text-[11px] font-bold tracking-widest text-gray-400">
+                <button onclick="scrollToSection('trendingSection')" class="hover:text-white uppercase transition">Trending</button>
+                <button onclick="scrollToSection('newSection')" class="hover:text-white uppercase transition">Famous</button>
+            </div>
         </div>
-        <video id="live-stream" class="video-js vjs-default-skin" controls preload="auto" autoplay muted data-setup="{}">
-            <source src="https://tataplaymt.slivcdn.com/hls/live/2020593/SONYSIXHD/hdntl=exp=1731573713~acl=%2f*~id=9fe101cc-720d-4ad9-8a2f-0486e168d663~data=hdntl~hmac=3564d515252751e2f54698072ac957db65a594dc4542d01ce2a327d1b3944214/master_3500.m3u8" type="application/x-mpegURL">
-            Your browser does not support HTML5 video.
-        </video>
+    </nav>
+
+    <!-- Home View -->
+    <main id="homePage" class="page-view active pt-28 pb-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="space-y-20">
+                <section id="trendingSection">
+                    <h2 class="section-header">Trending Now</h2>
+                    <div id="trendingRow" class="trending-container"></div>
+                </section>
+
+                <section id="newSection">
+                    <h2 class="section-header">Famous Recent Releases</h2>
+                    <div id="latestGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
+                </section>
+
+                <section id="searchSection" class="hidden">
+                    <h2 class="section-header">Search Results</h2>
+                    <div id="searchGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail View -->
+    <main id="detailPage" class="page-view min-h-screen pt-28 pb-20 px-6">
+        <div id="detailContent" class="max-w-7xl mx-auto"></div>
+    </main>
+
+    <div id="toast" class="fixed bottom-10 right-10 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl transform translate-y-40 transition-transform z-[1000]">
+        Review Added to Cloud!
     </div>
 
-    <p>Click the button below to join our Telegram channel:</p>
-    <a href="https://t.me/+NFoX453eVVI4N2M1" class="button" target="_blank">Join Now</a>
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <footer>
-        <p>&copy; 2024 FlickXDrive. All rights reserved.</p>
-    </footer>
+        // Firebase Setup
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cinemax-pro';
+        
+        let currentUser = null;
+        let unsubscribeReviews = null;
 
-    <!-- Video.js JS -->
-    <script src="https://vjs.zencdn.net/7.21.0/video.min.js"></script>
-    <script>
-        // Show loader while video is loading
-        var loader = document.getElementById('loader');
-        var player = videojs('live-stream');
+        // Auth Logic
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
 
-        player.ready(function() {
-            loader.style.display = 'block'; // Show loader on ready
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
         });
 
-        player.on('loadstart', function() {
-            loader.style.display = 'block'; // Show loader when loading starts
+        initAuth();
+
+        // App Logic
+        const TVMAZE_API = 'https://api.tvmaze.com';
+        const FAMOUS_TITLES = ["Stranger Things", "The Boys", "The Bear", "Shōgun", "Squid Game", "Fallout", "House of the Dragon", "The Last of Us"];
+        
+        let autoScrollInterval;
+
+        window.homeAndReset = () => {
+            document.getElementById('searchInput').value = '';
+            initHome();
+        };
+
+        window.scrollToSection = (id) => {
+            const el = document.getElementById(id);
+            if (el) window.scrollTo({ top: el.offsetTop - 120, behavior: 'smooth' });
+        };
+
+        async function initHome() {
+            switchView('homePage');
+            document.getElementById('searchSection').classList.add('hidden');
+            renderSkeletons();
+
+            try {
+                const famousData = await Promise.all(
+                    FAMOUS_TITLES.map(async title => {
+                        const res = await fetch(`${TVMAZE_API}/singlesearch/shows?q=${encodeURIComponent(title)}`);
+                        return await res.json();
+                    })
+                );
+
+                const latestRes = await fetch(`${TVMAZE_API}/shows?page=280`);
+                const latestData = await latestRes.json();
+                const modern = latestData.filter(s => s.premiered && parseInt(s.premiered.split('-')[0]) >= 2024);
+
+                renderTrending(famousData);
+                renderLatest([...famousData, ...modern].slice(0, 36));
+                startAutoScroll();
+            } catch (err) { console.error(err); }
+        }
+
+        function renderSkeletons() {
+            const trend = document.getElementById('trendingRow');
+            const grid = document.getElementById('latestGrid');
+            trend.innerHTML = grid.innerHTML = Array(6).fill().map(() => `<div class="aspect-[2/3] shimmer rounded-[2.5rem]"></div>`).join('');
+        }
+
+        function switchView(id) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        function renderTrending(items) {
+            const row = document.getElementById('trendingRow');
+            row.innerHTML = items.map(item => `
+                <div class="trending-card group" onclick="openDetails(${item.id})">
+                    <div class="relative aspect-[2/3] rounded-[2rem] overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl">
+                        <img src="${item.image?.medium || ''}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="mt-3 text-[11px] font-bold truncate uppercase tracking-tighter group-hover:text-red-500 transition">${item.name}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderLatest(items) {
+            const grid = document.getElementById('latestGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="movie-card group" onclick="openDetails(${item.id})">
+                    <div class="relative aspect-[2/3] rounded-[2.5rem] overflow-hidden mb-4 bg-zinc-900 border border-white/5">
+                        <img src="${item.image?.medium || ''}" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-sm truncate uppercase tracking-tighter">${item.name}</h3>
+                </div>
+            `).join('');
+        }
+
+        window.openDetails = async (id) => {
+            const res = await fetch(`${TVMAZE_API}/shows/${id}`);
+            const item = await res.json();
+            
+            const detailBox = document.getElementById('detailContent');
+            detailBox.innerHTML = `
+                <div class="relative grid lg:grid-cols-[400px_1fr] gap-16">
+                    <div class="fixed top-0 left-0 w-full h-screen z-0 opacity-10 pointer-events-none">
+                        <img src="${item.image?.original || ''}" class="w-full h-full object-cover blur-3xl scale-125">
+                        <div class="absolute inset-0 backdrop-mask"></div>
+                    </div>
+
+                    <div class="relative z-10">
+                        <img src="${item.image?.original || ''}" class="w-full rounded-[3.5rem] shadow-2xl border border-white/5 sticky top-32">
+                    </div>
+
+                    <div class="relative z-10 flex flex-col">
+                        <button onclick="homeAndReset()" class="mb-10 text-gray-500 hover:text-white transition font-black text-[10px] tracking-widest flex items-center gap-3">
+                            <i class="fas fa-arrow-left"></i> BACK
+                        </button>
+                        
+                        <h2 class="text-6xl lg:text-8xl font-black mb-6 uppercase tracking-tighter leading-none">${item.name}</h2>
+                        <div class="text-xl text-gray-300 leading-relaxed font-light mb-16 max-w-2xl">
+                            ${item.summary || ''}
+                        </div>
+
+                        <div class="space-y-16">
+                            <section>
+                                <h4 class="text-xl font-black uppercase tracking-tight mb-8">Recent Global Feedback</h4>
+                                <div id="reviewFeed" class="grid gap-6">
+                                    <div class="p-10 text-center text-gray-600 shimmer rounded-[2rem]">Loading global reviews...</div>
+                                </div>
+                            </section>
+
+                            <section class="decorated-review-area">
+                                <h3 class="text-3xl font-black mb-8 uppercase tracking-tighter">Post Global Critique</h3>
+                                <form id="reviewForm" class="space-y-6">
+                                    <div class="grid md:grid-cols-2 gap-8">
+                                        <div class="space-y-2">
+                                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-3">Username</label>
+                                            <input type="text" id="revUser" placeholder="Display Name" required class="bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-red-600 outline-none text-white w-full">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-3">Rating</label>
+                                            <div class="flex items-center justify-between bg-black/40 px-8 py-4 rounded-2xl border border-white/10">
+                                                <div class="flex gap-2" id="starInput">
+                                                    ${[1,2,3,4,5].map(i => `<i class="far fa-star text-lg cursor-pointer hover:text-red-500" data-val="${i}"></i>`).join('')}
+                                                </div>
+                                                <input type="hidden" id="revScore" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-3">Comments</label>
+                                        <textarea id="revComment" placeholder="Share your masterpiece or disaster..." required rows="4" class="w-full bg-black/40 border border-white/10 rounded-3xl px-6 py-5 focus:border-red-600 outline-none resize-none text-white"></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-2xl transition-all">POST TO CLOUD FEED</button>
+                                </form>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            `;
+            switchView('detailPage');
+            setupCloudReviews(id);
+            setupReviewInteractions(id);
+        };
+
+        function setupCloudReviews(showId) {
+            if (unsubscribeReviews) unsubscribeReviews();
+            
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', `reviews_${showId}`));
+            
+            const feed = document.getElementById('reviewFeed');
+            unsubscribeReviews = onSnapshot(q, (snapshot) => {
+                const reviews = [];
+                snapshot.forEach(doc => reviews.push(doc.data()));
+                
+                // Sort manually due to rule 2
+                reviews.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                if (reviews.length === 0) {
+                    feed.innerHTML = '<div class="p-10 border border-dashed border-white/10 rounded-[3rem] text-center text-gray-600 italic">No global feedback yet. Be the first!</div>';
+                } else {
+                    feed.innerHTML = reviews.map(r => `
+                        <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/5">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-bold text-sm text-red-500 uppercase">${r.user}</span>
+                                <div class="flex gap-1.5 text-[10px] text-yellow-500">
+                                    ${Array(5).fill(0).map((_, i) => `<i class="${i < r.score ? 'fas' : 'far'} fa-star"></i>`).join('')}
+                                </div>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed italic">"${r.comment}"</p>
+                        </div>
+                    `).join('');
+                }
+            }, (err) => console.error("Cloud Error:", err));
+        }
+
+        function setupReviewInteractions(showId) {
+            const stars = document.querySelectorAll('#starInput i');
+            const scoreInput = document.getElementById('revScore');
+            
+            stars.forEach(star => {
+                star.onclick = () => {
+                    const val = parseInt(star.dataset.val);
+                    scoreInput.value = val;
+                    stars.forEach((s, idx) => s.className = idx < val ? 'fas fa-star text-red-600 text-lg' : 'far fa-star text-gray-500 text-lg');
+                };
+            });
+
+            document.getElementById('reviewForm').onsubmit = async (e) => {
+                e.preventDefault();
+                if (!currentUser) return;
+                const score = parseInt(scoreInput.value);
+                if (!score) return alert("Select a rating!");
+
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `reviews_${showId}`), {
+                        user: document.getElementById('revUser').value,
+                        comment: document.getElementById('revComment').value,
+                        score: score,
+                        timestamp: serverTimestamp(),
+                        uid: currentUser.uid
+                    });
+                    
+                    document.getElementById('reviewForm').reset();
+                    stars.forEach(s => s.className = 'far fa-star text-gray-500 text-lg');
+                    scoreInput.value = "0";
+
+                    const toast = document.getElementById('toast');
+                    toast.classList.remove('translate-y-40');
+                    setTimeout(() => toast.classList.add('translate-y-40'), 3000);
+                } catch (err) { console.error("Save failed:", err); }
+            };
+        }
+
+        function startAutoScroll() {
+            const row = document.getElementById('trendingRow');
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+            autoScrollInterval = setInterval(() => {
+                if (!row) return;
+                const max = row.scrollWidth - row.clientWidth;
+                if (row.scrollLeft >= max - 5) row.scrollTo({ left: 0, behavior: 'smooth' });
+                else row.scrollBy({ left: 200, behavior: 'smooth' });
+            }, 10000);
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const queryStr = e.target.value;
+                if (!queryStr) return;
+                switchView('homePage');
+                document.getElementById('trendingSection').classList.add('hidden');
+                document.getElementById('newSection').classList.add('hidden');
+                document.getElementById('searchSection').classList.remove('hidden');
+                const res = await fetch(`${TVMAZE_API}/search/shows?q=${encodeURIComponent(queryStr)}`);
+                const data = await res.json();
+                document.getElementById('searchGrid').innerHTML = data.map(d => `
+                    <div class="movie-card group" onclick="openDetails(${d.show.id})">
+                        <div class="aspect-[2/3] rounded-[2.5rem] overflow-hidden mb-3 bg-zinc-900 border border-white/5">
+                            <img src="${d.show.image?.medium || ''}" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-bold text-sm truncate uppercase tracking-tighter">${d.show.name}</h3>
+                    </div>
+                `).join('');
+            }
         });
 
-        player.on('loadeddata', function() {
-            loader.style.display = 'none'; // Hide loader when data is loaded
-        });
-
-        player.on('error', function() {
-            loader.style.display = 'none'; // Hide loader on error
-            alert('There was an error with the video stream. Please try again later.');
-        });
+        window.onload = initHome;
     </script>
-
 </body>
 </html>
